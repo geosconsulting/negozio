@@ -7,14 +7,17 @@ from margini_modulo import (
     calcola_margine,
     calcola_da_lordo,
     markup_da_margine,
-    rotazione
+    markup_da_margine,
+    rotazione,
+    calcola_prezzo_finale,
+    ottimizza_prezzo
 )
 
 class CalcolatoreMarginiGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("🛒 Calcolatore Margini Caffè & Capsule")
-        self.root.geometry("700x700")
+        self.root.geometry("950x700")
 
         # Menu Bar
         menubar = tk.Menu(root)
@@ -72,6 +75,16 @@ class CalcolatoreMarginiGUI:
         tab5 = ttk.Frame(notebook)
         notebook.add(tab5, text="Rotazione Merci")
         self._setup_tab_rotazione(tab5)
+
+        # Tab 6: Calcolatore Completo
+        tab6 = ttk.Frame(notebook)
+        notebook.add(tab6, text="Calcolatore Completo")
+        self._setup_tab_calcolatore_completo(tab6)
+
+        # Tab 7: Ottimizzazione Prezzo
+        tab7 = ttk.Frame(notebook)
+        notebook.add(tab7, text="Ottimizzazione Prezzo")
+        self._setup_tab_ottimizzazione(tab7)
 
     def confirm_exit(self):
         if messagebox.askyesno("Conferma Uscita", "Sei sicuro di voler uscire?"):
@@ -511,6 +524,214 @@ Rotazione: 1200÷100 = 12x/anno (🏆 Ottimo!)
         self.vendite_entry.delete(0, tk.END)
         self.stock_entry.delete(0, tk.END)
         self.result_label_5.config(text="")
+
+    # === TAB 6: Calcolatore Completo ===
+    def _setup_tab_calcolatore_completo(self, parent):
+        # Frame input
+        input_frame = ttk.LabelFrame(parent, text="Input Dati", padding=10)
+        input_frame.pack(fill='x', padx=10, pady=5)
+
+        # Prezzo Totale
+        ttk.Label(input_frame, text="Prezzo Totale Lotto (€):").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
+        self.completo_prezzo_entry = ttk.Entry(input_frame, width=15)
+        self.completo_prezzo_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        # Numero Componenti
+        ttk.Label(input_frame, text="Numero Componenti:").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
+        self.completo_componenti_entry = ttk.Entry(input_frame, width=15)
+        self.completo_componenti_entry.insert(0, "1")
+        self.completo_componenti_entry.grid(row=1, column=1, padx=5, pady=5)
+
+        # IVA
+        ttk.Label(input_frame, text="IVA (%):").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
+        self.completo_iva_var = tk.DoubleVar(value=22.0)
+        iva_frame = ttk.Frame(input_frame)
+        iva_frame.grid(row=2, column=1, sticky=tk.W, padx=5, pady=5)
+        ttk.Radiobutton(iva_frame, text="22%", variable=self.completo_iva_var, value=22.0).pack(side=tk.LEFT, padx=5)
+        ttk.Radiobutton(iva_frame, text="10%", variable=self.completo_iva_var, value=10.0).pack(side=tk.LEFT, padx=5)
+
+        # Margine
+        ttk.Label(input_frame, text="Margine Desiderato (%):").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
+        self.completo_margine_entry = ttk.Entry(input_frame, width=15)
+        self.completo_margine_entry.grid(row=3, column=1, padx=5, pady=5)
+
+        # Bottoni
+        btn_calcola = ttk.Button(input_frame, text="Calcola Dettagli", command=self.calcola_completo_click)
+        btn_calcola.grid(row=4, column=0, padx=5, pady=10)
+        ttk.Button(input_frame, text="Pulisci", command=self.clear_tab6).grid(row=4, column=1, padx=5, pady=10)
+
+        # Output Area (Text widget per output dettagliato)
+        output_frame = ttk.LabelFrame(parent, text="Dettaglio Calcoli", padding=10)
+        output_frame.pack(fill='both', expand=True, padx=10, pady=5)
+
+        self.completo_output_text = tk.Text(output_frame, height=15, width=60, font=("Consolas", 10))
+        self.completo_output_text.pack(side=tk.LEFT, fill='both', expand=True)
+        
+        scrollbar = ttk.Scrollbar(output_frame, orient=tk.VERTICAL, command=self.completo_output_text.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.completo_output_text.config(yscrollcommand=scrollbar.set)
+
+    def calcola_completo_click(self):
+        try:
+            prezzo_totale = float(self.completo_prezzo_entry.get())
+            componenti = int(self.completo_componenti_entry.get())
+            iva = self.completo_iva_var.get()
+            margine = float(self.completo_margine_entry.get())
+
+            risultato = calcola_prezzo_finale(prezzo_totale, componenti, iva, margine)
+            
+            # Formattazione output (simile a stampa_risultato ma su stringa)
+            lines = []
+            if risultato['numero_componenti'] > 1:
+                lines.append(f"{'='*60}")
+                lines.append(f"💼 LOTTO ({risultato['numero_componenti']} componenti)")
+                lines.append(f"Costo totale lotto:    €{risultato['prezzo_totale']:>10.2f}")
+                lines.append(f"Costo unitario:        €{risultato['prezzo_unitario']:>10.2f}")
+                lines.append(f"{'='*60}")
+                lines.append(f"📦 CALCOLO UNITARIO")
+                lines.append(f"Prezzo unitario:       €{risultato['prezzo_unitario']:>10.2f}")
+                lines.append(f"IVA ({risultato['iva_percentuale']:>2.0f}%):             €{risultato['importo_iva_unitario']:>10.2f}")
+                lines.append(f"Prezzo con IVA:        €{risultato['prezzo_unitario_con_iva']:>10.2f}")
+                lines.append(f"Margine ({risultato['margine_percentuale']:>2.0f}%):          €{risultato['importo_margine_unitario']:>10.2f}")
+                lines.append(f"{'='*60}")
+                lines.append(f"💰 PREZZO FINALE UNITARIO: €{risultato['prezzo_finale_unitario']:>10.2f}")
+                lines.append(f"{'='*60}")
+                lines.append(f"🔢 TOTALI LOTTO COMPLETO")
+                lines.append(f"Ricavo totale:         €{risultato['totale_finale']:>10.2f}")
+                lines.append(f"Guadagno totale:       €{risultato['totale_finale'] - risultato['totale_con_iva']:>10.2f}")
+                lines.append(f"{'='*60}")
+            else:
+                lines.append(f"{'='*50}")
+                lines.append(f"Prezzo base:        €{risultato['prezzo_unitario']:>10.2f}")
+                lines.append(f"IVA ({risultato['iva_percentuale']:>2.0f}%):          €{risultato['importo_iva_unitario']:>10.2f}")
+                lines.append(f"Prezzo con IVA:     €{risultato['prezzo_unitario_con_iva']:>10.2f}")
+                lines.append(f"Margine ({risultato['margine_percentuale']:>2.0f}%):       €{risultato['importo_margine_unitario']:>10.2f}")
+                lines.append(f"{'='*50}")
+                lines.append(f"PREZZO FINALE:      €{risultato['prezzo_finale_unitario']:>10.2f}")
+                lines.append(f"{'='*50}")
+
+            # Aggiorna Widget Testo
+            self.completo_output_text.delete(1.0, tk.END)
+            self.completo_output_text.insert(tk.END, "\n".join(lines))
+
+        except Exception as e:
+            messagebox.showerror("Errore", f"Errore nel calcolo:\n{str(e)}")
+
+    def clear_tab6(self):
+        self.completo_prezzo_entry.delete(0, tk.END)
+        self.completo_componenti_entry.delete(0, tk.END)
+        self.completo_componenti_entry.insert(0, "1")
+        self.completo_margine_entry.delete(0, tk.END)
+        self.completo_output_text.delete(1.0, tk.END)
+
+    # === TAB 7: Ottimizzazione Prezzo ===
+    def _setup_tab_ottimizzazione(self, parent):
+        # Frame input
+        input_frame = ttk.LabelFrame(parent, text="Dati Scenari (per stima domanda)", padding=10)
+        input_frame.pack(fill='x', padx=10, pady=5)
+
+        # Costo Prodotto
+        ttk.Label(input_frame, text="Costo Prodotto (€):").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
+        self.opt_costo_entry = ttk.Entry(input_frame, width=15)
+        self.opt_costo_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        # Scenario A (Attuale)
+        ttk.Label(input_frame, text="SCENARIO A (Attuale)", font=("Arial", 10, "bold")).grid(row=1, column=0, columnspan=2, sticky=tk.W, pady=10)
+        
+        ttk.Label(input_frame, text="Prezzo Vendita (€):").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
+        self.opt_p_old_entry = ttk.Entry(input_frame, width=15)
+        self.opt_p_old_entry.grid(row=2, column=1, padx=5, pady=5)
+
+        ttk.Label(input_frame, text="Vendite (Unità):").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
+        self.opt_q_old_entry = ttk.Entry(input_frame, width=15)
+        self.opt_q_old_entry.grid(row=3, column=1, padx=5, pady=5)
+
+        # Scenario B (Nuovo/Test)
+        ttk.Label(input_frame, text="SCENARIO B (Test/Passato)", font=("Arial", 10, "bold")).grid(row=1, column=2, columnspan=2, sticky=tk.W, pady=10, padx=20)
+
+        ttk.Label(input_frame, text="Prezzo Vendita (€):").grid(row=2, column=2, sticky=tk.W, padx=5, pady=5)
+        self.opt_p_new_entry = ttk.Entry(input_frame, width=15)
+        self.opt_p_new_entry.grid(row=2, column=3, padx=5, pady=5)
+
+        ttk.Label(input_frame, text="Vendite (Unità):").grid(row=3, column=2, sticky=tk.W, padx=5, pady=5)
+        self.opt_q_new_entry = ttk.Entry(input_frame, width=15)
+        self.opt_q_new_entry.grid(row=3, column=3, padx=5, pady=5)
+
+        # Bottoni
+        btn_calcola = ttk.Button(input_frame, text="Calcola Ottimizzazione", command=self.calcola_ottimizzazione_click)
+        btn_calcola.grid(row=4, column=0, columnspan=2, pady=15)
+        ttk.Button(input_frame, text="Pulisci", command=self.clear_tab7).grid(row=4, column=2, columnspan=2, pady=15)
+
+        # Output Area
+        output_frame = ttk.LabelFrame(parent, text="Analisi e Risultati", padding=10)
+        output_frame.pack(fill='both', expand=True, padx=10, pady=5)
+
+        self.opt_output_text = tk.Text(output_frame, height=15, width=60, font=("Consolas", 10))
+        self.opt_output_text.pack(side=tk.LEFT, fill='both', expand=True)
+        
+        scrollbar = ttk.Scrollbar(output_frame, orient=tk.VERTICAL, command=self.opt_output_text.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.opt_output_text.config(yscrollcommand=scrollbar.set)
+
+    def calcola_ottimizzazione_click(self):
+        try:
+            costo = float(self.opt_costo_entry.get())
+            p_old = float(self.opt_p_old_entry.get())
+            q_old = float(self.opt_q_old_entry.get())
+            p_new = float(self.opt_p_new_entry.get())
+            q_new = float(self.opt_q_new_entry.get())
+
+            risultato = ottimizza_prezzo(costo, p_old, q_old, p_new, q_new)
+            
+            if 'error' in risultato:
+                messagebox.showerror("Errore", risultato['error'])
+                return
+
+            # Interpretazione Elasticità
+            ela = risultato['elasticita']
+            if abs(ela) > 1:
+                ela_desc = "Elastica (Sensibile al prezzo)"
+                consiglio = "Ridurre il prezzo potrebbe aumentare i ricavi totali."
+            elif abs(ela) < 1:
+                ela_desc = "Anelastica (Poco sensibile)"
+                consiglio = "Aumentare il prezzo potrebbe aumentare i ricavi senza perdere troppe vendite."
+            else:
+                ela_desc = "Unitaria"
+                consiglio = "Siamon in un punto di equilibrio dei ricavi."
+
+            lines = [
+                f"{'='*50}",
+                f"📊 ANALISI DELLA DOMANDA",
+                f"{'='*50}",
+                f"Elasticità calcolata: {ela}",
+                f"Tipo domanda:         {ela_desc}",
+                f"",
+                f"Curva Domanda stimata: Q = {risultato['domanda_a']} {risultato['domanda_b']} * P",
+                f"{'='*50}",
+                f"🏆 PREZZO OTTIMALE (Massimizzazione Profitto)",
+                f"{'='*50}",
+                f"Prezzo Suggerito:     € {risultato['prezzo_ottimale']}",
+                f"Quantità Stimata:       {risultato['quantita_stimata']} unità",
+                f"Profitto Stimato:     € {risultato['profitto_stimato']}",
+                f"Ricavo Stimato:       € {risultato['ricavo_stimato']}",
+                f"{'='*50}",
+                f"💡 CONSIGLIO:",
+                f"{consiglio}"
+            ]
+
+            self.opt_output_text.delete(1.0, tk.END)
+            self.opt_output_text.insert(tk.END, "\n".join(lines))
+
+        except Exception as e:
+            messagebox.showerror("Errore", f"Inserisci valori numerici validi!\n{str(e)}")
+
+    def clear_tab7(self):
+        self.opt_costo_entry.delete(0, tk.END)
+        self.opt_p_old_entry.delete(0, tk.END)
+        self.opt_q_old_entry.delete(0, tk.END)
+        self.opt_p_new_entry.delete(0, tk.END)
+        self.opt_q_new_entry.delete(0, tk.END)
+        self.opt_output_text.delete(1.0, tk.END)
 
 
 if __name__ == "__main__":

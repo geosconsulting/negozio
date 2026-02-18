@@ -8,48 +8,7 @@ import click
 from typing import List
 
 
-def calcola_prezzo_finale(prezzo_totale: float, numero_componenti: int,
-                          iva_percentuale: float,
-                          margine_percentuale: float) -> dict:
-    """
-    Calcola il prezzo finale con IVA e margine di guadagno
-    
-    Args:
-        prezzo_totale: Prezzo totale del lotto in euro
-        numero_componenti: Numero di componenti nel lotto
-        iva_percentuale: Percentuale IVA (10 o 22)
-        margine_percentuale: Percentuale margine di guadagno
-    
-    Returns:
-        Dizionario con tutti i calcoli
-    """
-    # Calcola prezzo unitario
-    prezzo_unitario = prezzo_totale / numero_componenti
-    
-    # Calcola IVA sul prezzo unitario
-    importo_iva_unitario = prezzo_unitario * (iva_percentuale / 100)
-    prezzo_unitario_con_iva = prezzo_unitario + importo_iva_unitario
-    
-    # Calcola margine sul prezzo unitario con IVA
-    importo_margine_unitario = prezzo_unitario_con_iva * (margine_percentuale / 100)
-    prezzo_finale_unitario = prezzo_unitario_con_iva + importo_margine_unitario
-    
-    return {
-        'prezzo_totale': prezzo_totale,
-        'numero_componenti': numero_componenti,
-        'prezzo_unitario': prezzo_unitario,
-        'iva_percentuale': iva_percentuale,
-        'importo_iva_unitario': importo_iva_unitario,
-        'prezzo_unitario_con_iva': prezzo_unitario_con_iva,
-        'margine_percentuale': margine_percentuale,
-        'importo_margine_unitario': importo_margine_unitario,
-        'prezzo_finale_unitario': prezzo_finale_unitario,
-        # Totali per l'intero lotto
-        'totale_iva': importo_iva_unitario * numero_componenti,
-        'totale_con_iva': prezzo_unitario_con_iva * numero_componenti,
-        'totale_margine': importo_margine_unitario * numero_componenti,
-        'totale_finale': prezzo_finale_unitario * numero_componenti
-    }
+from margini_modulo import calcola_prezzo_finale
 
 
 def stampa_risultato(risultato: dict):
@@ -71,7 +30,7 @@ def stampa_risultato(risultato: dict):
         click.echo(f"{'='*60}")
         click.echo(f"🔢 TOTALI LOTTO COMPLETO")
         click.echo(f"Ricavo totale:         €{risultato['totale_finale']:>10.2f}")
-        click.echo(f"Guadagno totale:       €{risultato['totale_finale'] - risultato['prezzo_totale']:>10.2f}")
+        click.echo(f"Guadagno totale:       €{risultato['totale_finale'] - risultato['totale_con_iva']:>10.2f}")
         click.echo(f"{'='*60}")
     else:
         # Mostra calcolo singolo (compatibilità con versione precedente)
@@ -132,7 +91,7 @@ def elabora_margini(prezzo_totale: float, componenti: int, iva: float, margini: 
             for risultato in risultati:
                 margine = risultato['margine_percentuale']
                 prezzo_finale = risultato['prezzo_finale_unitario']
-                guadagno_totale = prezzo_finale - risultato['prezzo_unitario']
+                guadagno_totale = prezzo_finale - risultato['prezzo_unitario_con_iva']
                 diff_primo = prezzo_finale - primo_prezzo
                 
                 click.echo(f"{margine:>6.0f}%    €{prezzo_finale:>10.2f}     €{guadagno_totale:>10.2f}      {diff_primo:+.2f}€")
