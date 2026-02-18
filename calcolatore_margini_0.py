@@ -7,7 +7,6 @@ from margini_modulo_corretto import (
     calcola_margine,
     calcola_da_lordo,
     markup_da_margine,
-    markup_da_margine,
     rotazione,
     calcola_prezzo_finale,
     ottimizza_prezzo
@@ -579,43 +578,35 @@ Rotazione: 1200÷100 = 12x/anno (🏆 Ottimo!)
             margine = float(self.completo_margine_entry.get())
 
             risultato = calcola_prezzo_finale(prezzo_totale, componenti, iva, margine)
-
-            # Nuove chiavi dopo correzione calcola_prezzo_finale:
-            #   prezzo_totale      → prezzo_totale_lotto
-            #   prezzo_unitario    → costo_unitario_netto
-            #   prezzo_unitario_con_iva → pv_netto_unitario
-            #   importo_margine_unitario → profitto_unitario_netto
-            #   totale_con_iva     → totale_pv_netto
+            
+            # Formattazione output (simile a stampa_risultato ma su stringa)
             lines = []
             if risultato['numero_componenti'] > 1:
                 lines.append(f"{'='*60}")
                 lines.append(f"💼 LOTTO ({risultato['numero_componenti']} componenti)")
-                lines.append(f"Costo totale lotto:    €{risultato['prezzo_totale_lotto']:>10.2f}")
-                lines.append(f"Costo unitario netto:  €{risultato['costo_unitario_netto']:>10.2f}")
+                lines.append(f"Costo totale lotto:    €{risultato['prezzo_totale']:>10.2f}")
+                lines.append(f"Costo unitario:        €{risultato['prezzo_unitario']:>10.2f}")
                 lines.append(f"{'='*60}")
                 lines.append(f"📦 CALCOLO UNITARIO")
-                lines.append(f"Costo unitario netto:  €{risultato['costo_unitario_netto']:>10.2f}")
-                lines.append(f"PV netto (margine {risultato['margine_percentuale']:>2.0f}%): €{risultato['pv_netto_unitario']:>10.2f}")
+                lines.append(f"Prezzo unitario:       €{risultato['prezzo_unitario']:>10.2f}")
                 lines.append(f"IVA ({risultato['iva_percentuale']:>2.0f}%):             €{risultato['importo_iva_unitario']:>10.2f}")
-                lines.append(f"Profitto unitario:     €{risultato['profitto_unitario_netto']:>10.2f}")
+                lines.append(f"Prezzo con IVA:        €{risultato['prezzo_unitario_con_iva']:>10.2f}")
+                lines.append(f"Margine ({risultato['margine_percentuale']:>2.0f}%):          €{risultato['importo_margine_unitario']:>10.2f}")
                 lines.append(f"{'='*60}")
                 lines.append(f"💰 PREZZO FINALE UNITARIO: €{risultato['prezzo_finale_unitario']:>10.2f}")
-                lines.append(f"   (Margine reale: {risultato['margine_reale_verificato']}%)")
                 lines.append(f"{'='*60}")
                 lines.append(f"🔢 TOTALI LOTTO COMPLETO")
-                lines.append(f"Ricavo totale (lordo): €{risultato['totale_finale']:>10.2f}")
-                lines.append(f"Totale IVA:            €{risultato['totale_iva']:>10.2f}")
-                lines.append(f"Profitto netto totale: €{risultato['totale_profitto_netto']:>10.2f}")
+                lines.append(f"Ricavo totale:         €{risultato['totale_finale']:>10.2f}")
+                lines.append(f"Guadagno totale:       €{risultato['totale_finale'] - risultato['totale_con_iva']:>10.2f}")
                 lines.append(f"{'='*60}")
             else:
                 lines.append(f"{'='*50}")
-                lines.append(f"Costo netto:        €{risultato['costo_unitario_netto']:>10.2f}")
-                lines.append(f"PV netto:           €{risultato['pv_netto_unitario']:>10.2f}")
+                lines.append(f"Prezzo base:        €{risultato['prezzo_unitario']:>10.2f}")
                 lines.append(f"IVA ({risultato['iva_percentuale']:>2.0f}%):          €{risultato['importo_iva_unitario']:>10.2f}")
-                lines.append(f"Profitto unitario:  €{risultato['profitto_unitario_netto']:>10.2f}")
+                lines.append(f"Prezzo con IVA:     €{risultato['prezzo_unitario_con_iva']:>10.2f}")
+                lines.append(f"Margine ({risultato['margine_percentuale']:>2.0f}%):       €{risultato['importo_margine_unitario']:>10.2f}")
                 lines.append(f"{'='*50}")
                 lines.append(f"PREZZO FINALE:      €{risultato['prezzo_finale_unitario']:>10.2f}")
-                lines.append(f"Margine reale:       {risultato['margine_reale_verificato']}%")
                 lines.append(f"{'='*50}")
 
             # Aggiorna Widget Testo

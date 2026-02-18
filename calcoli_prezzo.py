@@ -8,7 +8,7 @@ import click
 from typing import List
 
 
-from margini_modulo import calcola_prezzo_finale
+from margini_modulo_wrong import calcola_prezzo_finale
 
 
 def stampa_risultato(risultato: dict):
