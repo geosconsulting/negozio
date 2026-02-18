@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛒 Guida Calcolatore Margini Caffè & Capsule</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; background: linear-gradient(to bottom, #f8f9fa, #e9ecef); }
+        h1 { color: #2c5530; border-bottom: 4px solid #d4af37; padding-bottom: 15px; text-align: center; }
+        h2 { color: #3d7a3d; background: linear-gradient(90deg, #f0f8f0, #e8f5e8); padding: 15px; border-left: 6px solid #90ee90; border-radius: 0 8px 8px 0; margin: 20px 0; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        th, td { border: 1px solid #ddd; padding: 15px; text-align: left; }
+        th { background: linear-gradient(90deg, #e8f5e8, #d4edda); font-weight: bold; font-size: 1.1em; }
+        tr:nth-child(even) { background: #f8f9fa; }
+        .formula { background: linear-gradient(90deg, #f9f9f9, #f0f0f0); padding: 20px; border-left: 6px solid #4CAF50; font-family: 'Courier New', monospace; font-size: 1.1em; border-radius: 0 8px 8px 0; margin: 15px 0; }
+        .esempio { background: linear-gradient(90deg, #fff3cd, #ffeaa7); padding: 20px; border-radius: 10px; margin: 15px 0; border-left: 5px solid #f39c12; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .nav { background: linear-gradient(90deg, #e3f2fd, #bbdefb); padding: 20px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .icon { font-size: 1.5em; margin-right: 10px; }
+        footer { margin-top: 50px; padding: 20px; background: #343a40; color: white; text-align: center; border-radius: 10px; }
+        @media (max-width: 768px) { body { padding: 10px; } table { font-size: 0.9em; } }
+    </style>
+</head>
+<body>
+    <h1>🛒 Guida Completa Calcolatore Margini Caffè & Capsule</h1>
+    
+    <div class="nav">
+        <h2><span class="icon">📱</span>Navigazione Menu</h2>
+        <p><strong>Livello 1:</strong> Tipo prodotto (1: Caffè IVA 22%, 2: Non caffè IVA 10%, <code>0: Esci</code>)</p>
+        <p><strong>Livello 2:</strong> Calcoli (<code>1-5</code>, <code>0: Torna Livello 1</code>)</p>
+    </div>
+
+    <section>
+        <h2><span class="icon">📊</span>Opzione 1: "Margine da prezzi"</h2>
+        <p><strong>Quando usarla:</strong> Hai già deciso il prezzo vendita e vuoi verificare il margine effettivo.</p>
+        <div class="formula">
+            <strong>Margine %</strong> = (PV_netto - Costo_netto) ÷ PV_netto × 100<br>
+            <strong>PV_lordo</strong> = PV_netto × (1 + IVA/100)<br>
+            <strong>Profitto €</strong> = PV_netto - Costo_netto<br>
+            <strong>IVA €</strong> = PV_lordo - PV_netto
+        </div>
+        <div class="esempio">
+            <strong>Esempio tuo:</strong> Costo 10€, PV_netto 14.8€, IVA 22%<br>
+            • Margine: (14.8-10)÷14.8×100 = <strong>32.43%</strong> (sotto target 33-40%)<br>
+            • PV_lordo: 14.8×1.22 = <strong>18.06€</strong><br>
+            • Profitto: 14.8-10 = <strong>4.8€</strong><br>
+            • IVA: 18.06-14.8 = <strong>3.26€</strong>
+        </div>
+    </section>
+
+    <section>
+        <h2><span class="icon">💰</span>Opzione 2: "PV da margine"</h2>
+        <p><strong>Quando:</strong> Conosci costo fornitore, cerchi prezzo per <strong>margine esatto 33-40%</strong>.</p>
+        <div class="formula">
+            <strong>PV_netto</strong> = Costo_netto ÷ (1 - Margine/100)<br>
+            <strong>PV_lordo</strong> = PV_netto × (1 + IVA/100)
+        </div>
+        <div class="esempio">
+            Costo 10€, <strong>margine 33%</strong>, IVA 22%:<br>
+            PV_netto: 10÷(1-0.33) = 10÷0.67 = <strong>14.93€</strong><br>
+            PV_lordo: 14.93×1.22 = <strong>18.21€</strong>
+        </div>
+    </section>
+
+    <section>
+        <h2><span class="icon">📋</span>Opzione 3: "Scorporo IVA"</h2>
+        <p><strong>Quando:</strong> Cliente dice "fammi 18€", serve l'imponibile per fattura.</p>
+        <div class="formula">
+            <strong>PV_netto</strong> = PV_lordo ÷ (1 + IVA/100)
+        </div>
+        <div class="esempio">
+            PV_lordo <strong>20€</strong>, IVA 22%:<br>
+            PV_netto: 20÷1.22 = <strong>16.39€</strong><br>
+            (IVA implicita: 20-16.39 = 3.61€)
+        </div>
+    </section>
+
+    <section>
+        <h2><span class="icon">⚖️</span>Opzione 4: "Markup"</h2>
+        <p><strong>Quando:</strong> Vuoi sapere il <em>ricarico sul costo</em> equivalente al margine (confronto fornitori).</p>
+        <div class="formula">
+            <strong>Markup %</strong> = Margine % ÷ (100 - Margine %) × 100
+        </div>
+        <table>
+            <thead>
+                <tr><th>Margine desiderato</th><th>Markup equivalente</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>33%</td><td>49.25%</td></tr>
+                <tr><td>35%</td><td>53.85%</td></tr>
+                <tr><td>40%</td><td>66.67%</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2><span class="icon">🔄</span>Opzione 5: "Rotazione merci"</h2>
+        <p><strong>Quando:</strong> Controllare se lo stock "gira" velocemente (efficienza magazzino).</p>
+        <div class="formula">
+            <strong>Rotazione</strong> = Vendite_annue_unità ÷ Stock_medio_unità
+        </div>
+        <table>
+            <thead>
+                <tr><th>Rotazione/anno</th><th>Valutazione</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>10-20x</td><td>🏆 Ottimo</td></tr>
+                <tr><td>5-10x</td><td>👍 Buono</td></tr>
+                <tr><td>3-5x</td><td>⚠️ Sufficiente</td></tr>
+                <tr><td><3x</td><td>🚨 Migliora stock</td></tr>
+            </tbody>
+        </table>
+        <div class="esempio">
+            1200 capsule vendute/anno, stock medio 100u:<br>
+            Rotazione: 1200÷100 = <strong>12x</strong> (🏆 Ottimo!)
+        </div>
+    </section>
+
+    <footer>
+        <p>💡 <strong> Negozio caffè </strong><br>
+        Target margini: 33-40% | IVA caffè 22%, solubili 10% | Italia 2026</p>
+    </footer>
+</body>
+</html>
